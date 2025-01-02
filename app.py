@@ -23,6 +23,15 @@ def check_tar():
     except subprocess.CalledProcessError:
         return jsonify({"status": "error", "message": "tar is not available"})
 
+# 检查 sh 是否可用
+@app.route('/check-sh', methods=['GET'])
+def check_sh():
+    try:
+        subprocess.run(["sh", "--version"], check=True, capture_output=True)
+        return jsonify({"status": "success", "message": "sh is available"})
+    except subprocess.CalledProcessError:
+        return jsonify({"status": "error", "message": "sh is not available"})
+
 # 下载文件并解压 tar 文件
 @app.route('/download-and-extract', methods=['GET'])
 def download_and_extract():
@@ -84,6 +93,40 @@ def run_in_abc():
         return jsonify({
             "status": "success",
             "message": f"Switched to directory 'abc'. Current directory is: {output}"
+        })
+    
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# 执行 s.sh 脚本
+@app.route('/run-sh', methods=['GET'])
+def run_sh():
+    try:
+        # 检查 sh 是否可用
+        result = subprocess.run(["sh", "--version"], capture_output=True, text=True)
+        if result.returncode != 0:
+            return jsonify({"status": "error", "message": "sh is not available"}), 400
+        
+        # 切换到 abc 目录
+        if not os.path.isdir('abc'):
+            return jsonify({"status": "error", "message": "'abc' directory does not exist"}), 400
+        
+        os.chdir('abc')
+
+        # 执行 s.sh 脚本
+        sh_result = subprocess.run(
+            ["sh", "s.sh"],
+            capture_output=True, text=True
+        )
+
+        if sh_result.returncode != 0:
+            return jsonify({"status": "error", "message": "Failed to execute s.sh"}), 500
+
+        return jsonify({
+            "status": "success",
+            "message": "s.sh executed successfully.",
+            "sh_output": sh_result.stdout,
+            "sh_error": sh_result.stderr
         })
     
     except Exception as e:
