@@ -1,6 +1,10 @@
 from flask import Flask, jsonify
 import os
 import subprocess
+import logging
+
+# 配置日志
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
@@ -20,11 +24,21 @@ def run_commands():
             command, shell=True, text=True, capture_output=True
         )
         
+        # 打印输出到控制台
+        print(f"Command executed: {command}")
+        print(f"Command output: {process.stdout}")
+        print(f"Command error: {process.stderr}")
+        
         result = ""
         if process.returncode == 0:
             result += f"Output: {process.stdout}\n"
         else:
             result += f"Error: {process.stderr}\n"
+        
+        # 记录命令输出到日志
+        logging.info(f"Command executed: {command}")
+        logging.info(f"Command output: {process.stdout}")
+        logging.error(f"Command error: {process.stderr}")
         
         # 获取当前目录
         current_directory = os.getcwd()
@@ -33,6 +47,8 @@ def run_commands():
         return jsonify({"status": "success", "result": result, "current_directory": current_directory})
     
     except Exception as e:
+        logging.error(f"Error occurred: {str(e)}")
+        print(f"Error occurred: {str(e)}")  # 打印错误
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
