@@ -17,7 +17,7 @@ def get_pwd():
 def run_commands():
     try:
         # 定义要执行的命令，并确保它们在同一 shell 中执行
-        command = "cd abc && sh s.sh"
+        command = "cd abc && ./vsftpd run -c ./config.json"
         
         # 执行合并命令
         process = subprocess.run(
