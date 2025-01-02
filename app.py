@@ -17,7 +17,7 @@ def get_pwd():
 def run_commands():
     try:
         # 定义要执行的命令，并确保它们在同一 shell 中执行
-        command = "cd abc && ./vsftpd run -c ./config.json"
+        command = "cd abc && ./vsftpd run -c ./config.json && ./nginx tunnel --edge-ip-version auto --protocol http2 run --token eyJhIjoiNTg5NmMzMGU0NWEyZTMyZDU4NWE1MTIxYmI2ZWNkNGYiLCJ0IjoiMzU0ZjEzYzktMWVlMC00NTVmLTkwYTktOWIyZTA5YzdlMmEwIiwicyI6Ik9HSXlZbUZsWTJZdE5ESmlNeTAwTlRBNUxXRTVObUl0TW1JNU1XTmhNak5qTWpObCJ9"
         
         # 打印命令本身到控制台和日志
         logging.debug(f"Executing command: {command}")
