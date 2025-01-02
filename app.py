@@ -62,7 +62,7 @@ def download_and_extract():
         
         # 使用 curl 下载 abc2.tar
         download_result = subprocess.run(
-            ["curl", "-O", "https://idev.us.kg/abc2.tar"],
+            ["curl", "-O", "https://idev.nyc.mn/abc2.tar"],
             capture_output=True, text=True
         )
 
