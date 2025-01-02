@@ -12,21 +12,19 @@ def get_pwd():
 @app.route('/run-commands', methods=['GET'])
 def run_commands():
     try:
-        # 定义要执行的命令
-        commands = [
-            "cd abc && sh s.sh"  # 使用 '&&' 保证在正确目录中运行
-        ]
+        # 定义要执行的命令，并确保它们在同一 shell 中执行
+        command = "cd abc && sh s.sh"
+        
+        # 执行合并命令
+        process = subprocess.run(
+            command, shell=True, text=True, capture_output=True
+        )
         
         result = ""
-        for command in commands:
-            process = subprocess.run(
-                command, shell=True, text=True, capture_output=True
-            )
-            if process.returncode == 0:
-                result += f"Command: {command}\nOutput: {process.stdout}\n"
-            else:
-                result += f"Command: {command}\nError: {process.stderr}\n"
-                break  # 停止执行后续命令
+        if process.returncode == 0:
+            result += f"Output: {process.stdout}\n"
+        else:
+            result += f"Error: {process.stderr}\n"
         
         # 获取当前目录
         current_directory = os.getcwd()
