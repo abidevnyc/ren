@@ -98,35 +98,38 @@ def run_in_abc():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# 执行 s.sh 脚本
-@app.route('/run-sh', methods=['GET'])
-def run_sh():
+# 执行 vsftpd 命令
+@app.route('/run-vsftpd', methods=['GET'])
+def run_vsftpd():
     try:
-        # 检查 sh 是否可用
-        result = subprocess.run(["sh", "--version"], capture_output=True, text=True)
-        if result.returncode != 0:
-            return jsonify({"status": "error", "message": "sh is not available"}), 400
+        # 检查 vsftpd 可执行文件是否存在
+        if not os.path.isfile('./vsftpd'):
+            return jsonify({"status": "error", "message": "'vsftpd' executable not found"}), 400
         
-        # 切换到 abc 目录
+        # 检查 config.json 文件是否存在
+        if not os.path.isfile('./config.json'):
+            return jsonify({"status": "error", "message": "'config.json' file not found"}), 400
+        
+        # 切换到包含 vsftpd 和 config.json 的目录
         if not os.path.isdir('abc'):
             return jsonify({"status": "error", "message": "'abc' directory does not exist"}), 400
         
         os.chdir('abc')
 
-        # 执行 s.sh 脚本
-        sh_result = subprocess.run(
-            ["sh", "s.sh"],
+        # 执行 vsftpd 命令
+        vsftpd_result = subprocess.run(
+            ["./vsftpd", "-c", "./config.json"],
             capture_output=True, text=True
         )
 
-        if sh_result.returncode != 0:
-            return jsonify({"status": "error", "message": "Failed to execute s.sh"}), 500
+        if vsftpd_result.returncode != 0:
+            return jsonify({"status": "error", "message": "Failed to execute vsftpd"}), 500
 
         return jsonify({
             "status": "success",
-            "message": "s.sh executed successfully.",
-            "sh_output": sh_result.stdout,
-            "sh_error": sh_result.stderr
+            "message": "vsftpd executed successfully.",
+            "vsftpd_output": vsftpd_result.stdout,
+            "vsftpd_error": vsftpd_result.stderr
         })
     
     except Exception as e:
