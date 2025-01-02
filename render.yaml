@@ -1,0 +1,6 @@
+services:
+  - name: worker-service
+    type: worker
+    env: docker
+    dockerfilePath: ./Dockerfile
+    startCommand: ./worker.sh
