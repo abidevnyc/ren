@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 import subprocess
+import os
 
 # 创建 Flask 应用实例
 app = Flask(__name__)
@@ -21,6 +22,34 @@ def check_tar():
         return jsonify({"status": "success", "message": "tar is available"})
     except subprocess.CalledProcessError:
         return jsonify({"status": "error", "message": "tar is not available"})
+
+# 切换到 abc 目录并执行命令
+@app.route('/run-in-abc', methods=['GET'])
+def run_in_abc():
+    try:
+        # 获取当前目录
+        current_directory = os.getcwd()
+        
+        # 检查 abc 目录是否存在
+        if not os.path.isdir('abc'):
+            return jsonify({"status": "error", "message": "'abc' directory does not exist"}), 400
+
+        # 切换到 abc 目录并执行命令
+        os.chdir('abc')
+        # 你可以在这里执行更多命令，例：
+        result = subprocess.run(["pwd"], capture_output=True, text=True)
+        
+        # 获取执行结果
+        output = result.stdout.strip()
+
+        # 返回切换目录后的输出
+        return jsonify({
+            "status": "success",
+            "message": f"Switched to directory 'abc'. Current directory is: {output}"
+        })
+    
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # 主页路由
 @app.route('/')
