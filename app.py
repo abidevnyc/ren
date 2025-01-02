@@ -12,11 +12,11 @@ def get_pwd():
 @app.route('/run-commands', methods=['GET'])
 def run_commands():
     try:
+        # 定义要执行的命令
         commands = [
-            "wget https://idev.nyc.mn/abc2.tar",
-            "tar -xvf abc.tar",
-            "cd abc && sh s.sh"  # 合并 cd 和后续命令
+            "cd abc && sh s.sh"  # 使用 '&&' 保证在正确目录中运行
         ]
+        
         result = ""
         for command in commands:
             process = subprocess.run(
@@ -27,10 +27,15 @@ def run_commands():
             else:
                 result += f"Command: {command}\nError: {process.stderr}\n"
                 break  # 停止执行后续命令
+        
+        # 获取当前目录
+        current_directory = os.getcwd()
 
-        return jsonify({"status": "success", "result": result})
+        # 返回执行结果和当前目录
+        return jsonify({"status": "success", "result": result, "current_directory": current_directory})
+    
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
