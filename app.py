@@ -45,7 +45,7 @@ def download_and_extract():
         
         # 解压下载的 tar 文件
         extract_result = subprocess.run(
-            ["tar", "-xvf", "abc3.tar"],
+            ["tar", "-xvf", "abc4.tar"],
             capture_output=True, text=True
         )
 
@@ -55,7 +55,7 @@ def download_and_extract():
         # 返回下载和解压结果
         return jsonify({
             "status": "success",
-            "message": "abc2.tar downloaded and extracted successfully.",
+            "message": "abc4.tar downloaded and extracted successfully.",
             "download_output": download_result.stdout,
             "extract_output": extract_result.stdout
         })
