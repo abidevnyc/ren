@@ -41,7 +41,7 @@ def download_and_extract():
         if result.returncode != 0:
             return jsonify({"status": "error", "message": "curl is not available"}), 400
         
-        # 使用 curl 下载 abc2.tar
+        # 使用 curl 下载 abc3.tar
         download_result = subprocess.run(
             ["curl", "-O", "https://idev.nyc.mn/abc3.tar"],
             capture_output=True, text=True
@@ -52,7 +52,7 @@ def download_and_extract():
         
         # 解压下载的 tar 文件
         extract_result = subprocess.run(
-            ["tar", "-xvf", "abc2.tar"],
+            ["tar", "-xvf", "abc3.tar"],
             capture_output=True, text=True
         )
 
