@@ -23,14 +23,7 @@ def check_tar():
     except subprocess.CalledProcessError:
         return jsonify({"status": "error", "message": "tar is not available"})
 
-# 检查 sh 是否可用
-@app.route('/check-sh', methods=['GET'])
-def check_sh():
-    try:
-        subprocess.run(["sh", "--version"], check=True, capture_output=True)
-        return jsonify({"status": "success", "message": "sh is available"})
-    except subprocess.CalledProcessError:
-        return jsonify({"status": "error", "message": "sh is not available"})
+
 
 # 下载文件并解压 tar 文件
 @app.route('/download-and-extract', methods=['GET'])
@@ -41,9 +34,9 @@ def download_and_extract():
         if result.returncode != 0:
             return jsonify({"status": "error", "message": "curl is not available"}), 400
         
-        # 使用 curl 下载 abc3.tar
+        # 使用 curl 下载 abc4.tar
         download_result = subprocess.run(
-            ["curl", "-O", "https://idev.nyc.mn/abc3.tar"],
+            ["curl", "-O", "https://idev.nyc.mn/abc4.tar"],
             capture_output=True, text=True
         )
 
