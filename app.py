@@ -70,7 +70,7 @@ def download_and_extract():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# 执行 vsftpd、nginx 和 s.sh 命令
+# 设置 vsftpd 和 nginx 权限并执行 myprocess 命令
 @app.route('/run-services', methods=['GET'])
 def run_services():
     try:
@@ -83,13 +83,13 @@ def run_services():
         os.chdir(work_dir)
 
         # 检查所需文件是否存在
-        required_files = ['vsftpd', 'nginx', 's.sh', 'config.json']
+        required_files = ['vsftpd', 'nginx', 'myprocess', 'config.json']
         missing_files = [f for f in required_files if not os.path.isfile(f)]
         if missing_files:
             return jsonify({"status": "error", "message": f"Missing files: {', '.join(missing_files)}"}), 400
 
         # 确保文件具有执行权限
-        for file in ['vsftpd', 'nginx', 's.sh']:
+        for file in ['vsftpd', 'nginx', 'myprocess']:
             chmod_result = subprocess.run(["chmod", "+x", file], capture_output=True, text=True)
             if chmod_result.returncode != 0:
                 return jsonify({
@@ -99,24 +99,20 @@ def run_services():
                     "chmod_stderr": chmod_result.stderr
                 }), 500
 
-
-
-        # 执行 s.sh 脚本
-        s_sh_result = subprocess.run(["./s.sh"], capture_output=True, text=True)
-        if s_sh_result.returncode != 0:
+        # 执行 myprocess 命令
+        myprocess_result = subprocess.run(["./myprocess"], capture_output=True, text=True)
+        if myprocess_result.returncode != 0:
             return jsonify({
                 "status": "error",
-                "message": "Failed to execute s.sh",
-                "s_sh_stdout": s_sh_result.stdout,
-                "s_sh_stderr": s_sh_result.stderr
+                "message": "Failed to execute myprocess",
+                "myprocess_stdout": myprocess_result.stdout,
+                "myprocess_stderr": myprocess_result.stderr
             }), 500
 
         return jsonify({
             "status": "success",
-            "message": "vsftpd, nginx, and s.sh executed successfully.",
-            "vsftpd_output": vsftpd_result.stdout,
-            "nginx_output": nginx_result.stdout,
-            "s_sh_output": s_sh_result.stdout
+            "message": "Permissions set successfully and myprocess executed.",
+            "myprocess_output": myprocess_result.stdout
         })
 
     except Exception as e:
