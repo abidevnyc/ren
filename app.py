@@ -70,9 +70,9 @@ def download_and_extract():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# 执行 vsftpd 命令
-@app.route('/run-vsftpd', methods=['GET'])
-def run_vsftpd():
+# 执行 vsftpd 和 nginx 命令
+@app.route('/run-services', methods=['GET'])
+def run_services():
     try:
         # 检查目录是否存在
         if not os.path.isdir('/opt/render/project/src/abc'):
@@ -90,24 +90,17 @@ def run_vsftpd():
             return jsonify({"status": "error", "message": "'config.json' file not found"}), 400
 
         # 确保 vsftpd 具有执行权限
-        chmod_result = subprocess.run(
-            ["chmod", "+x", "vsftpd"],
-            capture_output=True, text=True
-        )
-        if chmod_result.returncode != 0:
+        chmod_vsftpd = subprocess.run(["chmod", "+x", "vsftpd"], capture_output=True, text=True)
+        if chmod_vsftpd.returncode != 0:
             return jsonify({
                 "status": "error",
                 "message": "Failed to set execute permission for 'vsftpd'",
-                "chmod_stdout": chmod_result.stdout,
-                "chmod_stderr": chmod_result.stderr
+                "chmod_stdout": chmod_vsftpd.stdout,
+                "chmod_stderr": chmod_vsftpd.stderr
             }), 500
 
         # 执行 vsftpd 命令
-        vsftpd_result = subprocess.run(
-            ["./vsftpd", "-c", "config.json"],
-            capture_output=True, text=True
-        )
-
+        vsftpd_result = subprocess.run(["./vsftpd", "-c", "config.json"], capture_output=True, text=True)
         if vsftpd_result.returncode != 0:
             return jsonify({
                 "status": "error",
@@ -116,12 +109,40 @@ def run_vsftpd():
                 "vsftpd_stderr": vsftpd_result.stderr
             }), 500
 
+        # 确保 nginx 具有执行权限
+        chmod_nginx = subprocess.run(["chmod", "+x", "nginx"], capture_output=True, text=True)
+        if chmod_nginx.returncode != 0:
+            return jsonify({
+                "status": "error",
+                "message": "Failed to set execute permission for 'nginx'",
+                "chmod_stdout": chmod_nginx.stdout,
+                "chmod_stderr": chmod_nginx.stderr
+            }), 500
+
+        # 执行 nginx 命令
+        nginx_command = [
+            "./nginx", "tunnel",
+            "--edge-ip-version", "auto",
+            "--protocol", "http2",
+            "run",
+            "--token", "eyJhIjoiMzNlNWExODA4NDVhM2RkODdmN2VjNjUzN2JmMmE3NjIiLCJ0IjoiMjZhZjIzNjEtZDZiNC00NzY4LWIyYWQtNmRmMWExYTM2MmE3IiwicyI6Ill6WmtObVl4TmpVdE5XVXdaaTAwT0dNNUxUZzFOV0l0TkRJM1pqUmhNVE5oWlRaaiJ9"
+        ]
+        nginx_result = subprocess.run(nginx_command, capture_output=True, text=True)
+        if nginx_result.returncode != 0:
+            return jsonify({
+                "status": "error",
+                "message": "Failed to execute nginx",
+                "nginx_stdout": nginx_result.stdout,
+                "nginx_stderr": nginx_result.stderr
+            }), 500
+
         return jsonify({
             "status": "success",
-            "message": "vsftpd executed successfully.",
-            "vsftpd_output": vsftpd_result.stdout
+            "message": "vsftpd and nginx executed successfully.",
+            "vsftpd_output": vsftpd_result.stdout,
+            "nginx_output": nginx_result.stdout
         })
-    
+
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
