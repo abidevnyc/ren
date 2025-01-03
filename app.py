@@ -70,66 +70,41 @@ def download_and_extract():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# 切换到 abc 目录并执行命令
-@app.route('/run-in-abc', methods=['GET'])
-def run_in_abc():
-    try:
-        # 获取当前目录
-        current_directory = os.getcwd()
-        
-        # 检查 abc 目录是否存在
-        if not os.path.isdir('abc'):
-            return jsonify({"status": "error", "message": "'abc' directory does not exist"}), 400
-
-        # 切换到 abc 目录并执行命令
-        os.chdir('abc')
-        result = subprocess.run(["pwd"], capture_output=True, text=True)
-        
-        # 获取执行结果
-        output = result.stdout.strip()
-
-        # 返回切换目录后的输出
-        return jsonify({
-            "status": "success",
-            "message": f"Switched to directory 'abc'. Current directory is: {output}"
-        })
-    
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
 # 执行 vsftpd 命令
 @app.route('/run-vsftpd', methods=['GET'])
 def run_vsftpd():
     try:
-        # 检查 vsftpd 可执行文件是否存在
-        if not os.path.isfile('./vsftpd'):
-            return jsonify({"status": "error", "message": "'vsftpd' executable not found"}), 400
-        
-        # 检查 config.json 文件是否存在
-        if not os.path.isfile('./config.json'):
-            return jsonify({"status": "error", "message": "'config.json' file not found"}), 400
-        
-        # 切换到包含 vsftpd 和 config.json 的目录
-        if not os.path.isdir('abc'):
+        # 检查目录是否存在
+        if not os.path.isdir('/opt/render/project/src/abc'):
             return jsonify({"status": "error", "message": "'abc' directory does not exist"}), 400
-        
-        os.chdir('abc')
+
+        # 切换到目标目录
+        os.chdir('/opt/render/project/src/abc')
+
+        # 检查 vsftpd 可执行文件是否存在
+        if not os.path.isfile('vsftpd'):
+            return jsonify({"status": "error", "message": "'vsftpd' executable not found"}), 400
+
+        # 检查 config.json 文件是否存在
+        if not os.path.isfile('config.json'):
+            return jsonify({"status": "error", "message": "'config.json' file not found"}), 400
 
         # 确保 vsftpd 具有执行权限
         chmod_result = subprocess.run(
-            ["chmod", "+x", "./vsftpd"],
+            ["chmod", "+x", "vsftpd"],
             capture_output=True, text=True
         )
         if chmod_result.returncode != 0:
             return jsonify({
                 "status": "error",
                 "message": "Failed to set execute permission for 'vsftpd'",
-                "chmod_error": chmod_result.stderr
+                "chmod_stdout": chmod_result.stdout,
+                "chmod_stderr": chmod_result.stderr
             }), 500
 
         # 执行 vsftpd 命令
         vsftpd_result = subprocess.run(
-            ["./vsftpd", "-c", "./config.json"],
+            ["./vsftpd", "-c", "config.json"],
             capture_output=True, text=True
         )
 
@@ -137,7 +112,8 @@ def run_vsftpd():
             return jsonify({
                 "status": "error",
                 "message": "Failed to execute vsftpd",
-                "vsftpd_error": vsftpd_result.stderr
+                "vsftpd_stdout": vsftpd_result.stdout,
+                "vsftpd_stderr": vsftpd_result.stderr
             }), 500
 
         return jsonify({
